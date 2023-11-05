@@ -388,3 +388,59 @@ status: {}
 - ``` kubectl expose deployment cka-deployment --port=3306 --target-port=3306 --name=cka-service```
 
 
+- Switch to context “kubernetes-admin@kubernetes” and Create a deployment by name cka-deployment, as per the below requirements:
+
+Replicas: 4
+Image : nginx:1.14
+namespace: cka-exam
+Implement strategy for rolling update with maxUnavailable: 50%
+
+ 
+  * Update deployment : Image: nginx:1.15
+
+  * Update Deployment once again: Image: nginx:1.99
+
+Check the rollout status & rollout history.
+After 2nd rollout, if pods are not up then roll back the deployment to its initial version (image=nginx:1.14)
+
+- ``` kubectl config use-context kubernetes-admin@kubernetes```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: nginx
+  name: nginx
+  namespace: cka-exam
+spec:
+  replicas: 4
+  selector:
+    matchLabels:
+      app: nginx
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 50%
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:1.14
+        name: nginx
+        resources: {}
+status: {}
+```
+- ``` kubectl -n cka-exam set image deployment/nginx nginx=nginx:1.15```
+- ```kubectl -n cka-exam set image deployment/nginx nginx=nginx:1.99```
+- ``` kubectl -n cka-exam rollout status deployment/nginx```
+- ```kubectl -n cka-exam rollout history deployment/nginx```
+- ```kubectl -n cka-exam rollout undo deployment/nginx --to-revision=1```
+
+
+
+
