@@ -441,6 +441,14 @@ status: {}
 - ```kubectl -n cka-exam rollout history deployment/nginx```
 - ```kubectl -n cka-exam rollout undo deployment/nginx --to-revision=1```
 
+- List pods Sorted by Restart Count. 
+List PersistentVolumes sorted by capacity. 
+List Services Sorted by Name
+
+- ``` kubectl get pods --sort-by='.status.containerStatuses[0].restartCount'```
+- ``` kubectl get pv --sort-by=.spec.capacity.storage```
+- ``` kubectl get services --sort-by=.metadata.name```
+
 
 
 
