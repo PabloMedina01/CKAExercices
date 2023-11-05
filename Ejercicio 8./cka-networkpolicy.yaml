@@ -1,0 +1,33 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: cka-networkpolicy
+  namespace: web
+spec:
+  podSelector:
+    matchLabels:
+      run: webserver
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: app
+        - podSelector:
+            matchLabels:
+              run: app
+      ports:
+        - protocol: TCP
+          port: 8080
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: db
+        - podSelector:
+            matchLabels:
+              run: db
+      ports:
+        - protocol: TCP
+          port: 6379
+

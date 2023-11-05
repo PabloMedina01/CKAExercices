@@ -1,0 +1,42 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: cka-deployment
+  name: cka-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cka-deployment
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: cka-deployment
+    spec:
+      containers:
+      - image: devopstitan/cka-exam:mysql-question-09
+        name: cka-exam
+        volumeMounts:
+        - name: task-pv-storage
+          mountPath: "/var/lib/mysql"
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: cka-secret
+              key: password    
+        ports:
+          - containerPort: 3306
+            name: "http-server"    
+        resources: {}
+      volumes:
+      - name: task-pv-storage
+        persistentVolumeClaim:
+          claimName: cka-pvc        
+
+
+status: {}

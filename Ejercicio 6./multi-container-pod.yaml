@@ -1,0 +1,27 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: multi-container-pod
+  name: multi-container-pod
+spec:
+  containers:
+  - image: busybox:1.28
+    name: main
+    args: [ "/bin/sh","-c", "i=0; while true; do echo “$i: $(date)” >> /var/log/cka-exam.log; i=$((i+1)); sleep 1; done"]  
+    volumeMounts:
+    - name: main-volume
+      mountPath: /var/log  
+  - image: busybox:1.28
+    name: sidecar
+    args: ["/bin/sh", "-c", "tail -n+1 -F /var/log/cka-exam.log"]
+    volumeMounts:
+    - name: main-volume
+      mountPath: /var/log    
+    resources: {}
+  volumes:
+    - name: main-volume    
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
