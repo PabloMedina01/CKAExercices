@@ -570,9 +570,60 @@ status: {}
 
 - Create a NetworkPolicy which denies all ingress traffic.
 
+```yaml
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+```
+
+-  Create a pod myapp-pod and that use an initContainer that uses the busybox image and
+sleeps for 20 seconds.
+
+- ```kubectl run myapp-pod --image=nginx --dry-run=client -o yaml > myapp.pod```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: myapp-pod
+  labels:
+    app.kubernetes.io/name: MyApp
+spec:
+  initContainers:
+  - name: init-myservice
+    image: busybox
+    command: ['sh', '-c', "sleep 20"]
+
+```
 
 
+- Create the ingress resource with name ingress-wear-watch to make the applications available
+at /wear on the Ingress service in app-space namespace.
 
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: ingress-wear-watch
+spec:
+  rules:
+  - host: wear-watch.com
+    http:
+      paths:
+      - pathType: Prefix
+        path: "/wear"
+        backend:
+          service:
+            name: wear-service
+            port:
+              number: 8080
+```
 
 
 
