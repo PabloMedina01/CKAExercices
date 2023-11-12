@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pvviewer
+  name: pvviewer
+  namespace: default  
+spec:
+  containers:
+  - image: redis
+    name: pvviewer
+    resources: {}
+  serviceAccountName: pvviewer    
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}

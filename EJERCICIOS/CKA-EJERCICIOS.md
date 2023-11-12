@@ -449,6 +449,132 @@ List Services Sorted by Name
 - ``` kubectl get pv --sort-by=.spec.capacity.storage```
 - ``` kubectl get services --sort-by=.metadata.name```
 
+- Create a new service account with the name pvviewer. Grant this Service account access to list all PersistentVolumes in the cluster by creating an appropriate cluster role called pvviewer-role and ClusterRoleBinding called pvviewer-role-binding.
+Next, create a pod called pvviewer with the image: redis and serviceaccount: pvviewer in the default namespace.
+
+- ```kubectl create serviceaccount pvviewer```
+- ```kubectl create clusterrole pvviewerrole --verb=list --resource=persistentvolumes```
+- ``` kubectl create clusterrolebinding pvviewer-role-binding --clusterrole=pvviewer --serviceaccount=default:pvviewer```
+
+- ```kubectl run pvviewer --image=redis --dry-run=client -o yaml > pvviewer-pod.yaml```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: pvviewer
+  name: pvviewer
+  namespace: default  
+spec:
+  containers:
+  - image: redis
+    name: pvviewer
+    resources: {}
+  serviceAccountName: pvviewer    
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+- ```kubectl apply -f pvviewer-pod.yaml ```
+
+- Create a new deployment called nginx-deploy, with image nginx:1.16 and 1 replica. Record the version. Next upgrade the deployment to version 1.17 using rolling update. Make sure that the version upgrade is recorded in the resource annotation.
+
+- ``` kubectl create deployment nginx-deploy --image=nginx:1.16 --replicas=1```
+- ``` kubectl set image deployment/nginx-deploy nginx=nginx:1.17```
+- ```Annotations: deployment.kubernetes.io/revision: 2```
+
+- Create snapshot of the etcd running at https://127.0.0.1:2379. Save snapshot into /opt/etcd-snapshot.db.
+
+- ``` ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save  /opt/etcd-snapshot.db```
+
+- Create a Persistent Volume with the given specification.
+Volume Name: pv-analytics, Storage: 100Mi, Access modes: ReadWriteMany, Host Path: /pv/data-analytics
+
+```yaml
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv-analytics
+spec:
+  capacity:
+    storage: 100Mi
+  accessModes:
+    - ReadWriteMany
+  hostPath:
+    path: "/pv/data-analytics"
+```
+
+- ```kubectl apply -f pv-analytics.yaml```
+
+- Taint the worker node to be Unschedulable. Once done, create a pod called dev-redis, image redis:alpine to ensure workloads are not scheduled to this worker node. Finally, create a new pod called prod-redis and image redis:alpine with toleration to be scheduled on node01.
+key:env_type, value:production, operator: Equal and effect:NoSchedule
+
+- ```kubectl taint node node01 env_type=production:NoSchedule```
+- ```kubectl run prod-redis --image=redis:alpine --dry-run=client -o yaml > prod-redis.yaml ```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: prod-redis
+  name: prod-redis
+spec:
+  containers:
+  - image: redis:alpine
+    name: prod-redis
+    resources: {}
+  tolerations:
+  - key: "env_type"
+    operator: "Equal"
+    value: "production"
+    effect: "NoSchedule" 
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+
+```
+
+- Set the node named worker node as unavailable and reschedule all the pods running on it. (Drain node)
+
+- ```kubectl drain node <worker node> --ignore-daemonsets```
+
+- Create a Pod called non-root-pod , image: redis:alpine
+  - runAsUser: 1000
+  - fsGroup: 2000
+
+- ```kubectl run non-root-pod --image=redis:alpine --dry-run=client -o yaml > non-root-pod.yaml``` 
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  creationTimestamp: null
+  labels:
+    run: non-root-pod
+  name: non-root-pod
+spec:
+  securityContext:
+    runAsUser: 1000
+    fsGroup: 2000
+  containers:
+  - image: redis:alpine
+    name: non-root-pod
+    resources: {}
+  dnsPolicy: ClusterFirst
+  restartPolicy: Always
+status: {}
+```
+
+- Create a NetworkPolicy which denies all ingress traffic.
+
+
+
+
+
+
 
 
 
