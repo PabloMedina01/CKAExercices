@@ -661,9 +661,46 @@ spec:
 - Use JSON PATH query to retrive the osImage of all the nodes and store it in a file /opt/outputs/nodes_os_x43kj56.txt The osImage  are under the nodeInfo section under status of each node.
 - ```kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}'```
 
+- Take a backup of the etcd cluster and save it to /opt/etcd-backup.db
+- ```ETCDCTL_API=3 etcdctl --endpoints=https://127.0.0.1:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt --cert=/etc/kubernetes/pki/etcd/server.crt --key=/etc/kubernetes/pki/etcd/server.key snapshot save /opt/etcd-backup.db```
+
+- <p style="color:red;">Crate a new user called john. Grant him access to the cluster. John should have permission to create, list, get, update and delete pods in the development namespace. The private key exists in the location: /root/CKA/john.key and csr at /root/CKA/john.car</p>
+
+- ```cat <<EOF | kubectl apply -f -
+apiVersion: certificates.k8s.io/v1
+kind: CertificateSigningRequest
+metadata:
+  name: john-developer
+spec:
+  request: LS0tLS1CRUdJTiBDRVJUSUZJQ0FURSBSRVFVRVNULS0tLS0KTUlJQ1ZqQ0NBVDRDQVFBd0VURVBNQTBHQTFVRUF3d0dZVzVuWld4aE1JSUJJakFOQmdrcWhraUc5dzBCQVFFRgpBQU9DQVE4QU1JSUJDZ0tDQVFFQTByczhJTHRHdTYxakx2dHhWTTJSVlRWMDNHWlJTWWw0dWluVWo4RElaWjBOCnR2MUZtRVFSd3VoaUZsOFEzcWl0Qm0wMUFSMkNJVXBGd2ZzSjZ4MXF3ckJzVkhZbGlBNVhwRVpZM3ExcGswSDQKM3Z3aGJlK1o2MVNrVHF5SVBYUUwrTWM5T1Nsbm0xb0R2N0NtSkZNMUlMRVI3QTVGZnZKOEdFRjJ6dHBoaUlFMwpub1dtdHNZb3JuT2wzc2lHQ2ZGZzR4Zmd4eW8ybmlneFNVekl1bXNnVm9PM2ttT0x1RVF6cXpkakJ3TFJXbWlECklmMXBMWnoyalVnald4UkhCM1gyWnVVV1d1T09PZnpXM01LaE8ybHEvZi9DdS8wYk83c0x0MCt3U2ZMSU91TFcKcW90blZtRmxMMytqTy82WDNDKzBERHk5aUtwbXJjVDBnWGZLemE1dHJRSURBUUFCb0FBd0RRWUpLb1pJaHZjTgpBUUVMQlFBRGdnRUJBR05WdmVIOGR4ZzNvK21VeVRkbmFjVmQ1N24zSkExdnZEU1JWREkyQTZ1eXN3ZFp1L1BVCkkwZXpZWFV0RVNnSk1IRmQycVVNMjNuNVJsSXJ3R0xuUXFISUh5VStWWHhsdnZsRnpNOVpEWllSTmU3QlJvYXgKQVlEdUI5STZXT3FYbkFvczFqRmxNUG5NbFpqdU5kSGxpT1BjTU1oNndLaTZzZFhpVStHYTJ2RUVLY01jSVUyRgpvU2djUWdMYTk0aEpacGk3ZnNMdm1OQUxoT045UHdNMGM1dVJVejV4T0dGMUtCbWRSeEgvbUNOS2JKYjFRQm1HCkkwYitEUEdaTktXTU0xMzhIQXdoV0tkNjVoVHdYOWl4V3ZHMkh4TG1WQzg0L1BHT0tWQW9FNkpsYWFHdTlQVmkKdjlOSjVaZlZrcXdCd0hKbzZXdk9xVlA3SVFjZmg3d0drWm89Ci0tLS0tRU5EIENFUlRJRklDQVRFIFJFUVVFU1QtLS0tLQo=
+  signerName: kubernetes.io/kube-apiserver-client
+  expirationSeconds: 86400  # one day
+  usages:
+  - client auth
+EOF```
+
+- ```cat john.csr | base64 | tr -d "\n"```
+- ```kubectl apply -f john-csr.yaml```
+- ```kubectl certificate approve john-developer```
+- ```kubectl create role developer --namespace=development --verbs=create,get,list,update,delete --resource=pods```
+- ```kubectl create rolebinding john-developer --role=developer --user=john -n development```
+- ```kubectl auth can-i get pods --namespace=development --as john```
 
 
+- Create a nginx pod called nginx-resolver using image nginx, expose it internally with a service called nginx-resolver-service.
 
+- ```kubectl run nginx-resolver --image=nginx```
+- ```kubectl expose pod nginx-resolver --name=nginx-resolver-service --port=80```
+- ```kubectl run busybox --image=busybox:1.28 -- sleep 4000```
+- ```kubectl exec busybox -- nslookup nignx-resolver-service > /root/CKA/nginx.svc```
+- ```kubectl exec busybox -- nslookup nignx-resolver-pod > /root/CKA/nginx.pod```
+
+- Create a static pod on node01 called nginx-critical with image nginx and make sure that it is recreated/restarted automatically in case of failure. Use /etc/kubernetes/manifests as the Static Pod path for example.
+
+- ```kubectl get nodes node01 -o wide```
+- ```ssh <internalIP(NODE01)>```
+- ```kubectl run nginx-critical --image=nginx --dry-run=client -o yaml > nginx-critical.yaml```
+- ```mv nginx-critical.yaml etc/kubernetes/manifests```
 
 
 
