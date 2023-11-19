@@ -707,6 +707,17 @@ spec:
 - ```exit```
 - ```kubectl get pods```
 
+- Create a new service account with the name pvviewer. Grant this Service account access to list all PersistentVolumes in the cluster by creating an appropiate cluster role called pvviewer-role and ClusterRoleBinding called pvviewer-role-binding. Next, create a pod called pvviewer with the image: redis and serviceAccount: pvviewer in the default namespace.
+
+- ```kubectl create serviceaccount pvviewer```
+- ```kubectl create clusterrole pvviewer-role --verb=list --resource=persistentvolume```
+- ```kubectl create clusterrolebinding pvviewer-role-binding --clusterole=pvviewer-role --serviceaccount=default:pvviewer```
+
+- List the InteralIP of all nodes of the cluster. Save the result to a file /root/CKA/node_ips. Answer shoud be in the format: InternalIP of controlplane InternalIp of node01 (in a single line).
+
+- ```kubectl get nodes -o json | jq | grep -i internalIP -B 100```
+- ```kubectl get nodes -o json | jq -c 'paths'```
+- ```kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address} > /root/CKA/node_ips```
 
 
 
