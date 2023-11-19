@@ -626,6 +626,49 @@ spec:
 ```
 
 
+## UDEMY COURSE MOCK EXAMS (CKA COURSE)
+
+- Deploy a pod named nginx-pod using the nginx:alpine image.
+- ```kubectl run nginx-pod --image=nginx:alpine```
+
+- Deploy a messaging pod using the redis:alpine image with the labels set to tier=msg.
+- ```kubectl run messsaging --image=redis:alpine --labels="tier=msg"```
+
+- Create a namespace named apx-x9984574.
+- ```kubectl create ns apx-x9984574```
+
+- <p style="color:red;">Get the list of nodes in JSON format and store it in a file at /opt/outputs/nodes-z344kd9.json</p>
+- ```kubectl get nodes -o json > /opt/outputs/nodes-z344kd9.json```
+
+- Create a service messaging-service to expose the messaging application within the cluster on port 6379.
+- ```kubectl expose pod messaging --port=6379 --name=messaging-service```
+
+- Create a deployment named hr-web-app using the image kodekloud/webapp-color with 2 replicas.
+- ```kubectl create deployment hr-web-app --image=kodekloud/webapp-color --replicas=2```
+
+- <p style="color:red;">Crate a static pod named static-busybox on the controlplane node that uses the busybox image and the command sleep 1000.</p>
+- ```kubectl run static-busybox --image=busybox --dry-run=client -o yaml --command --sleep 1000 > static-busybox.yaml```
+- ```mv static-busybox.yaml > /etc/kubernetes/manifests```
+
+- kubectl create a pod in the finance namespace named temp-bus with the image redis:alpine.
+
+- ```kubectl run temp-bus --image=redis:alpine --namespace=finance```
+
+- Expose the hr-web-app as service hr-web-app-service application on port 30082 on the nodes on the cluster. The web application listens on port 8080.
+- ```kubectl expose deploy hr-web-app --name=hr-web-app-service --type=NodePort --port 8080```
+- ```kubectl edit svc hr-web-app-service```
+
+- Use JSON PATH query to retrive the osImage of all the nodes and store it in a file /opt/outputs/nodes_os_x43kj56.txt The osImage  are under the nodeInfo section under status of each node.
+- ```kubectl get nodes -o jsonpath='{.items[*].status.nodeInfo.osImage}'```
+
+
+
+
+
+
+
+
+
 
 
 
